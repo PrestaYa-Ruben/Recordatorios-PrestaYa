@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Cobros</title>
+<meta name="theme-color" content="#3FA556">
+<meta name="description" content="Control de cobros diarios">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cobros">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+  :root{
+    --bg-header:#FDFCFA;
+    --bg-panel:#F1F2F7;
+    --card-bg:#FFFFFF;
+    --text-primary:#1C1C1E;
+    --text-secondary:#8B8B93;
+    --text-muted:#B4B4BC;
+    --accent-green:#3FA556;
+    --accent-green-dark:#2F8A44;
+    --accent-blue:#4A6CF7;
+    --chip-bg:#E9EAFC;
+    --chip-text:#5B6EE8;
+    --border-light:#ECECF0;
+    --danger:#E4483A;
+    --shadow-card:0 2px 10px rgba(20,20,30,0.05);
+    --shadow-pop:0 10px 30px rgba(20,20,30,0.18);
+    --radius-lg:22px;
+    --radius-md:16px;
+    --radius-full:999px;
+    --safe-top:env(safe-area-inset-top,0px);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:var(--bg-panel);
+    color:var(--text-primary);
+    overscroll-behavior-y:none;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;}
+  input{font-family:inherit;}
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--bg-panel);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+
+  /* Header */
+  .topbar{
+    background:var(--bg-header);
+    padding:calc(14px + var(--safe-top)) 16px 14px;
+    display:flex;
+    align-items:center;
+    position:relative;
+  }
+  .back-btn{
+    width:40px;height:40px;
+    border:none;background:transparent;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-primary);
+    border-radius:var(--radius-full);
+    flex-shrink:0;
+  }
+  .back-btn:active{background:rgba(0,0,0,0.05);}
+  .topbar h1{
+    flex:1;
+    text-align:center;
+    font-size:26px;
+    font-weight:800;
+    letter-spacing:-0.3px;
+    margin:0;
+    margin-right:40px;
+  }
+
+  /* Panel */
+  .panel{
+    background:var(--bg-panel);
+    padding:18px 16px calc(100px + var(--safe-bottom));
+    flex:1;
+  }
+
+  .date-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+    gap:10px;
+  }
+  .date-title-btn{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    background:transparent;
+    border:none;
+    padding:0;
+    font-size:23px;
+    font-weight:800;
+    color:var(--text-primary);
+    letter-spacing:-0.3px;
+    text-align:left;
+  }
+  .date-title-btn svg{flex-shrink:0;margin-top:2px;}
+  .hoy-btn{
+    flex-shrink:0;
+    background:var(--card-bg);
+    border:1.5px solid var(--accent-blue);
+    color:var(--accent-blue);
+    font-weight:700;
+    font-size:15px;
+    padding:9px 20px;
+    border-radius:var(--radius-full);
+  }
+  .hoy-btn:active{background:#EEF1FF;}
+  .hoy-btn.is-today{opacity:0.45;}
+
+  /* Date strip */
+  .date-strip-wrap{
+    margin:0 -16px 18px;
+    padding:0 16px;
+    overflow-x:auto;
+    scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .date-strip-wrap::-webkit-scrollbar{display:none;}
+  .date-strip{
+    display:flex;
+    gap:10px;
+    width:max-content;
+  }
+  .date-card{
+    scroll-snap-align:center;
+    flex-shrink:0;
+    width:78px;
+    height:96px;
+    border-radius:var(--radius-md);
+    background:var(--card-bg);
+    border:1px solid var(--border-light);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    color:var(--text-primary);
+  }
+  .date-card .mon{font-size:12px;color:var(--text-secondary);font-weight:600;text-transform:lowercase;}
+  .date-card .day{font-size:26px;font-weight:800;line-height:1.1;}
+  .date-card .wk{font-size:12px;color:var(--text-secondary);font-weight:600;text-transform:lowercase;}
+  .date-card.selected{
+    background:var(--accent-green);
+    border-color:var(--accent-green);
+  }
+  .date-card.selected .mon,.date-card.selected .wk{color:rgba(255,255,255,0.85);}
+  .date-card.selected .day{color:#fff;}
+  .date-card.has-dot{position:relative;}
+  .date-card .dot{
+    position:absolute;
+    bottom:8px;
+    width:5px;height:5px;
+    border-radius:50%;
+    background:var(--accent-blue);
+  }
+  .date-card.selected .dot{background:#fff;}
+
+  /* Search */
+  .search-bar{
+    background:var(--card-bg);
+    border-radius:var(--radius-md);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 16px;
+    margin-bottom:16px;
+    box-shadow:var(--shadow-card);
+  }
+  .search-bar svg{flex-shrink:0;color:var(--text-secondary);}
+  .search-bar input{
+    border:none;background:transparent;outline:none;
+    width:100%;font-size:16px;color:var(--text-primary);
+  }
+  .search-bar input::placeholder{color:var(--text-muted);}
+
+  /* List */
+  .cobros-list{display:flex;flex-direction:column;gap:12px;}
+  .cobro-card{
+    background:var(--card-bg);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-card);
+    padding:16px;
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .cobro-card:active{transform:scale(0.99);}
+  .bell-btn{
+    width:36px;height:36px;
+    flex-shrink:0;
+    border:none;background:transparent;
+    color:var(--accent-blue);
+    display:flex;align-items:center;justify-content:center;
+    margin-top:2px;
+  }
+  .bell-btn.done{color:var(--text-muted);}
+  .cobro-main{flex:1;min-width:0;cursor:pointer;}
+  .cobro-name{
+    font-size:19px;font-weight:800;color:var(--text-primary);
+    margin:0 0 6px;letter-spacing:-0.2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .cobro-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .cobro-cuota{font-size:16px;color:var(--text-secondary);font-weight:500;white-space:nowrap;}
+  .cobro-chip{
+    background:var(--chip-bg);color:var(--chip-text);
+    font-size:13px;font-weight:700;
+    padding:5px 12px;border-radius:var(--radius-full);
+    white-space:nowrap;
+  }
+  .cobro-card.done{opacity:0.5;}
+  .cobro-card.done .cobro-name{text-decoration:line-through;}
+  .chev-btn{
+    width:28px;height:28px;flex-shrink:0;
+    border:none;background:transparent;color:var(--text-muted);
+    display:flex;align-items:center;justify-content:center;
+    margin-top:6px;
+  }
+
+  /* Empty state */
+  .empty-state{
+    text-align:center;
+    padding:60px 20px 30px;
+    color:var(--text-secondary);
+  }
+  .empty-state svg{margin-bottom:14px;color:var(--text-muted);}
+  .empty-state p{margin:0;font-size:15px;font-weight:600;}
+  .empty-state span{font-size:13px;color:var(--text-muted);}
+
+  /* FAB */
+  .fab{
+    position:fixed;
+    right:calc(50% - 240px + 20px);
+    bottom:calc(24px + var(--safe-bottom));
+    width:58px;height:58px;
+    border-radius:50%;
+    background:var(--accent-green);
+    color:#fff;
+    border:none;
+    box-shadow:0 6px 18px rgba(63,165,86,0.45);
+    display:flex;align-items:center;justify-content:center;
+    z-index:50;
+  }
+  @media (max-width:520px){
+    .fab{right:20px;}
+  }
+  .fab:active{background:var(--accent-green-dark);transform:scale(0.96);}
+
+  /* Modal / bottom sheet */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(20,20,25,0.42);
+    display:flex;align-items:flex-end;justify-content:center;
+    opacity:0;pointer-events:none;
+    transition:opacity 0.22s ease;
+    z-index:100;
+  }
+  .overlay.open{opacity:1;pointer-events:auto;}
+  .sheet{
+    background:var(--card-bg);
+    width:100%;max-width:480px;
+    border-radius:26px 26px 0 0;
+    padding:10px 20px calc(24px + var(--safe-bottom));
+    transform:translateY(100%);
+    transition:transform 0.28s cubic-bezier(.2,.8,.2,1);
+    max-height:88vh;
+    overflow-y:auto;
+  }
+  .overlay.open .sheet{transform:translateY(0);}
+  .sheet-handle{
+    width:40px;height:5px;background:var(--border-light);
+    border-radius:var(--radius-full);margin:6px auto 16px;
+  }
+  .sheet h2{font-size:21px;font-weight:800;margin:0 0 4px;letter-spacing:-0.3px;}
+  .sheet .sub{color:var(--text-secondary);font-size:14px;margin:0 0 20px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:6px;}
+  .field input,.field select{
+    width:100%;padding:13px 14px;border-radius:14px;
+    border:1.5px solid var(--border-light);font-size:16px;
+    background:#FAFAFC;color:var(--text-primary);outline:none;
+  }
+  .field input:focus,.field select:focus{border-color:var(--accent-blue);}
+  .detail-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 0;border-bottom:1px solid var(--border-light);
+  }
+  .detail-row:last-of-type{border-bottom:none;}
+  .detail-row .k{color:var(--text-secondary);font-size:14px;font-weight:600;}
+  .detail-row .v{font-weight:800;font-size:16px;text-align:right;}
+  .sheet-actions{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
+  .btn{
+    width:100%;padding:15px;border-radius:16px;border:none;
+    font-size:16px;font-weight:700;display:flex;align-items:center;
+    justify-content:center;gap:8px;
+  }
+  .btn-primary{background:var(--accent-green);color:#fff;}
+  .btn-primary:active{background:var(--accent-green-dark);}
+  .btn-whatsapp{background:#25D366;color:#fff;}
+  .btn-outline{background:#fff;color:var(--text-primary);border:1.5px solid var(--border-light);}
+  .btn-danger{background:#FDECEB;color:var(--danger);}
+  .btn-secondary{background:#F1F2F7;color:var(--text-primary);}
+  .btn-row{display:flex;gap:10px;}
+  .btn-row .btn{flex:1;}
+
+  /* Toast */
+  .toast{
+    position:fixed;left:50%;bottom:24px;
+    transform:translateX(-50%) translateY(20px);
+    background:#22232B;color:#fff;
+    padding:12px 20px;border-radius:var(--radius-full);
+    font-size:14px;font-weight:600;
+    box-shadow:var(--shadow-pop);
+    opacity:0;transition:all 0.25s ease;
+    pointer-events:none;z-index:200;
+    max-width:88%;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .offline-dot{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11px;font-weight:700;color:var(--text-muted);
+    position:absolute;top:calc(8px + var(--safe-top));right:14px;
+  }
+  .offline-dot .d{width:7px;height:7px;border-radius:50%;background:#C7C9D1;}
+  .offline-dot.on .d{background:var(--accent-green);}
+
+  ::selection{background:var(--chip-bg);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <button class="back-btn" id="backBtn" aria-label="Volver">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <h1>Cobros</h1>
+    <span class="offline-dot" id="connDot"><span class="d"></span><span id="connLabel">En línea</span></span>
+  </header>
+
+  <main class="panel">
+    <div class="date-row">
+      <button class="date-title-btn" id="dateTitleBtn">
+        <span id="dateTitleText">Hoy</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="hoy-btn" id="hoyBtn">Hoy</button>
+    </div>
+
+    <div class="date-strip-wrap" id="stripWrap">
+      <div class="date-strip" id="dateStrip"></div>
+    </div>
+
+    <div class="search-bar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" id="searchInput" placeholder="Buscar cliente...">
+    </div>
+
+    <div class="cobros-list" id="cobrosList"></div>
+  </main>
+
+  <button class="fab" id="fabAdd" aria-label="Agregar cobro">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+  </button>
+
+  <!-- Detail sheet -->
+  <div class="overlay" id="detailOverlay">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 id="detNombre">Nombre</h2>
+      <p class="sub" id="detCuota">Cuota</p>
+      <div>
+        <div class="detail-row"><span class="k">Valor</span><span class="v" id="detValor">$0</span></div>
+        <div class="detail-row"><span class="k">Vence</span><span class="v" id="detFecha">-</span></div>
+        <div class="detail-row"><span class="k">Estado</span><span class="v" id="detEstado">Pendiente</span></div>
+      </div>
+      <div class="sheet-actions">
+        <button class="btn btn-whatsapp" id="detWhatsapp">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.44 1.32 4.94L2 22l5.29-1.39a9.9 9.9 0 004.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C22 6.45 17.5 2 12.04 2zm0 18.14c-1.5 0-2.97-.4-4.25-1.16l-.3-.18-3.14.82.84-3.06-.2-.32a8.2 8.2 0 01-1.26-4.33c0-4.53 3.69-8.22 8.23-8.22 2.2 0 4.26.86 5.82 2.41a8.15 8.15 0 012.41 5.81c0 4.53-3.69 8.23-8.15 8.23z"/></svg>
+          Contactar por WhatsApp
+        </button>
+        <button class="btn btn-primary" id="detMarcarPagado">Marcar como cobrado</button>
+        <div class="btn-row">
+          <button class="btn btn-outline" id="detEditar">Editar</button>
+          <button class="btn btn-danger" id="detEliminar">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit sheet -->
+  <div class="overlay" id="formOverlay">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <h2 id="formTitle">Nuevo cobro</h2>
+      <p class="sub">Completa los datos del cliente</p>
+      <div class="field">
+        <label>Nombre del cliente</label>
+        <input type="text" id="fName" placeholder="Ej: Diana Martinez">
+      </div>
+      <div class="field">
+        <label>WhatsApp (opcional)</label>
+        <input type="tel" id="fPhone" placeholder="Ej: 3001234567">
+      </div>
+      <div class="btn-row">
+        <div class="field" style="flex:1;">
+          <label>N° de cuota</label>
+          <input type="number" id="fCuota" placeholder="1" min="1">
+        </div>
+        <div class="field" style="flex:1;">
+          <label>Valor</label>
+          <input type="number" id="fValor" placeholder="0" min="0">
+        </div>
+      </div>
+      <div class="field">
+        <label>Fecha de vencimiento</label>
+        <input type="date" id="fFecha">
+      </div>
+      <div class="sheet-actions">
+        <button class="btn btn-primary" id="fSave">Guardar</button>
+        <button class="btn btn-secondary" id="fCancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<input type="date" id="jumpDateInput" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;">
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- Utilidades de fecha ---------- */
+  var MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  var DIAS = ["dom","lun","mar","mié","jue","vie","sáb"];
+
+  function pad(n){ return n<10 ? "0"+n : ""+n; }
+  function toISO(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function fromISO(iso){ var p=iso.split("-"); return new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2])); }
+  function todayISO(){ return toISO(new Date()); }
+  function addDays(iso,n){ var d=fromISO(iso); d.setDate(d.getDate()+n); return toISO(d); }
+  function longDate(iso){ var d=fromISO(iso); return d.getDate()+" "+MESES[d.getMonth()]+" "+d.getFullYear(); }
+  function chipDate(iso){ var d=fromISO(iso); return d.getDate()+" "+MESES[d.getMonth()].substring(0,4)+" "+d.getFullYear(); }
+  function money(n){ n=Number(n)||0; return "$"+n.toLocaleString('es-CO',{maximumFractionDigits:0}); }
+
+  /* ---------- Estado ---------- */
+  var STORAGE_KEY = "cobros_app_data_v1";
+  var state = {
+    selectedDate: todayISO(),
+    search: "",
+    editingId: null,
+    activeId: null
+  };
+
+  function seedData(){
+    var t = todayISO();
+    return [
+      {id: cid(), name:"Diana Martinez", phone:"", cuota:5, amount:123000, dueDate:t, status:"pendiente", reminded:true},
+      {id: cid(), name:"Gustavo Palacios", phone:"", cuota:4, amount:260000, dueDate:t, status:"pendiente", reminded:true},
+      {id: cid(), name:"Lorena", phone:"", cuota:2, amount:200000, dueDate:t, status:"pendiente", reminded:true},
+      {id: cid(), name:"Andres Loaiza", phone:"", cuota:4, amount:65000, dueDate:t, status:"pendiente", reminded:true},
+      {id: cid(), name:"Francis Peña", phone:"", cuota:2, amount:87000, dueDate:t, status:"pendiente", reminded:true},
+      {id: cid(), name:"Valentina Montoya", phone:"", cuota:2, amount:120000, dueDate:t, status:"pendiente", reminded:true},
+      {id: cid(), name:"Camilo Osorio", phone:"", cuota:2, amount:165000, dueDate:t, status:"pendiente", reminded:true}
+    ];
+  }
+
+  function cid(){ return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw){
+        var seeded = seedData();
+        save(seeded);
+        return seeded;
+      }
+      return JSON.parse(raw);
+    }catch(e){ return seedData(); }
+  }
+  function save(data){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+  }
+
+  var cobros = load();
+
+  /* ---------- Render: título y tira de fechas ---------- */
+  var dateTitleText = document.getElementById('dateTitleText');
+  var dateStrip = document.getElementById('dateStrip');
+  var stripWrap = document.getElementById('stripWrap');
+  var hoyBtn = document.getElementById('hoyBtn');
+
+  function hasPendientes(iso){
+    return cobros.some(function(c){ return c.dueDate===iso && c.status==="pendiente"; });
+  }
+
+  function renderTitle(){
+    if(state.selectedDate === todayISO()){
+      dateTitleText.textContent = "Hoy · " + longDate(state.selectedDate);
+    } else {
+      dateTitleText.textContent = longDate(state.selectedDate);
+    }
+    hoyBtn.classList.toggle('is-today', state.selectedDate === todayISO());
+  }
+
+  function renderStrip(){
+    dateStrip.innerHTML = "";
+    var center = state.selectedDate;
+    var start = addDays(center, -3);
+    var frag = document.createDocumentFragment();
+    var selectedEl = null;
+    for(var i=0;i<7;i++){
+      var iso = addDays(start, i);
+      var d = fromISO(iso);
+      var card = document.createElement('button');
+      card.className = 'date-card' + (iso===state.selectedDate ? ' selected' : '') + (hasPendientes(iso) ? ' has-dot' : '');
+      card.innerHTML = '<span class="mon">'+MESES[d.getMonth()].substring(0,3)+'</span>' +
+                        '<span class="day">'+d.getDate()+'</span>' +
+                        '<span class="wk">'+DIAS[d.getDay()]+'</span>' +
+                        (hasPendientes(iso) ? '<span class="dot"></span>' : '');
+      card.addEventListener('click', (function(iso){
+        return function(){ state.selectedDate = iso; renderAll(); };
+      })(iso));
+      frag.appendChild(card);
+      if(iso===state.selectedDate) selectedEl = card;
+    }
+    dateStrip.appendChild(frag);
+    if(selectedEl){
+      requestAnimationFrame(function(){
+        selectedEl.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+      });
+    }
+  }
+
+  /* ---------- Render: lista de cobros ---------- */
+  var cobrosList = document.getElementById('cobrosList');
+  var searchInput = document.getElementById('searchInput');
+
+  function normalize(s){
+    return (s||"").toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,"");
+  }
+
+  function renderList(){
+    var items = cobros.filter(function(c){
+      if(c.dueDate !== state.selectedDate) return false;
+      if(state.search && normalize(c.name).indexOf(normalize(state.search)) === -1) return false;
+      return true;
+    });
+    items.sort(function(a,b){
+      if(a.status !== b.status) return a.status==="pendiente" ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    cobrosList.innerHTML = "";
+    if(items.length === 0){
+      cobrosList.innerHTML =
+        '<div class="empty-state">'+
+        '<svg width="52" height="52" viewBox="0 0 24 24" fill="none"><path d="M12 8v5l3 2" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/></svg>'+
+        '<p>No hay cobros para este día</p>'+
+        '<span>Toca el botón + para agregar uno</span>'+
+        '</div>';
+      return;
+    }
+
+    var frag = document.createDocumentFragment();
+    items.forEach(function(c){
+      var card = document.createElement('div');
+      card.className = 'cobro-card' + (c.status==="cobrado" ? ' done' : '');
+
+      var bell = document.createElement('button');
+      bell.className = 'bell-btn' + (c.status==="cobrado" ? ' done' : (c.reminded ? '' : ' done'));
+      bell.setAttribute('aria-label','Recordatorio');
+      bell.innerHTML = (c.reminded && c.status!=="cobrado")
+        ? '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a2.4 2.4 0 002.4-2.4h-4.8A2.4 2.4 0 0012 22zm7.2-6V11a7.2 7.2 0 00-5.4-6.97V3.2a1.8 1.8 0 10-3.6 0v.83A7.2 7.2 0 004.8 11v5l-1.8 1.8v.9h18v-.9L19.2 16z"/></svg>'
+        : '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 22a2.4 2.4 0 002.4-2.4h-4.8A2.4 2.4 0 0012 22zm7.2-6V11a7.2 7.2 0 00-5.4-6.97V3.2a1.8 1.8 0 10-3.6 0v.83A7.2 7.2 0 004.8 11v5l-1.8 1.8v.9h18v-.9L19.2 16z"/></svg>';
+      bell.addEventListener('click', function(){
+        c.reminded = !c.reminded;
+        save(cobros);
+        renderList();
+      });
+
+      var main = document.createElement('div');
+      main.className = 'cobro-main';
+      main.innerHTML =
+        '<p class="cobro-name">'+escapeHtml(c.name)+'</p>'+
+        '<div class="cobro-meta">'+
+          '<span class="cobro-cuota">Cuota #'+c.cuota+' - '+money(c.amount)+'</span>'+
+          '<span class="cobro-chip">'+chipDate(c.dueDate)+'</span>'+
+        '</div>';
+      main.addEventListener('click', function(){ openDetail(c.id); });
+
+      var chev = document.createElement('button');
+      chev.className = 'chev-btn';
+      chev.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      chev.addEventListener('click', function(){ openDetail(c.id); });
+
+      card.appendChild(bell);
+      card.appendChild(main);
+      card.appendChild(chev);
+      frag.appendChild(card);
+    });
+    cobrosList.appendChild(frag);
+  }
+
+  function escapeHtml(s){
+    var div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function renderAll(){
+    renderTitle();
+    renderStrip();
+    renderList();
+  }
+
+  /* ---------- Búsqueda ---------- */
+  searchInput.addEventListener('input', function(){
+    state.search = searchInput.value;
+    renderList();
+  });
+
+  /* ---------- Botón Hoy / título con selector de fecha ---------- */
+  hoyBtn.addEventListener('click', function(){
+    state.selectedDate = todayISO();
+    renderAll();
+  });
+
+  var jumpDateInput = document.getElementById('jumpDateInput');
+  document.getElementById('dateTitleBtn').addEventListener('click', function(){
+    jumpDateInput.value = state.selectedDate;
+    jumpDateInput.focus();
+    if(jumpDateInput.showPicker){ try{ jumpDateInput.showPicker(); }catch(e){} }
+    else { jumpDateInput.click(); }
+  });
+  jumpDateInput.addEventListener('change', function(){
+    if(jumpDateInput.value){
+      state.selectedDate = jumpDateInput.value;
+      renderAll();
+    }
+  });
+
+  document.getElementById('backBtn').addEventListener('click', function(){
+    if(window.history.length > 1){ window.history.back(); }
+  });
+
+  /* ---------- Detalle ---------- */
+  var detailOverlay = document.getElementById('detailOverlay');
+  var detNombre = document.getElementById('detNombre');
+  var detCuota = document.getElementById('detCuota');
+  var detValor = document.getElementById('detValor');
+  var detFecha = document.getElementById('detFecha');
+  var detEstado = document.getElementById('detEstado');
+  var detMarcarPagado = document.getElementById('detMarcarPagado');
+  var detWhatsapp = document.getElementById('detWhatsapp');
+
+  function findCobro(id){
+    for(var i=0;i<cobros.length;i++){ if(cobros[i].id===id) return cobros[i]; }
+    return null;
+  }
+
+  function openDetail(id){
+    var c = findCobro(id);
+    if(!c) return;
+    state.activeId = id;
+    detNombre.textContent = c.name;
+    detCuota.textContent = "Cuota #"+c.cuota;
+    detValor.textContent = money(c.amount);
+    detFecha.textContent = longDate(c.dueDate);
+    detEstado.textContent = c.status==="cobrado" ? "Cobrado" : "Pendiente";
+    detMarcarPagado.textContent = c.status==="cobrado" ? "Marcar como pendiente" : "Marcar como cobrado";
+    detailOverlay.classList.add('open');
+  }
+  function closeDetail(){ detailOverlay.classList.remove('open'); state.activeId=null; }
+  detailOverlay.addEventListener('click', function(e){ if(e.target===detailOverlay) closeDetail(); });
+
+  detMarcarPagado.addEventListener('click', function(){
+    var c = findCobro(state.activeId);
+    if(!c) return;
+    c.status = c.status==="cobrado" ? "pendiente" : "cobrado";
+    save(cobros);
+    closeDetail();
+    renderAll();
+    showToast(c.status==="cobrado" ? "Cobro marcado como cobrado" : "Cobro marcado como pendiente");
+  });
+
+  detWhatsapp.addEventListener('click', function(){
+    var c = findCobro(state.activeId);
+    if(!c) return;
+    var phone = c.phone ? c.phone.replace(/\D/g,'') : "";
+    if(!phone){
+      closeDetail();
+      openForm(c.id);
+      showToast("Agrega un número de WhatsApp para contactar");
+      return;
+    }
+    var msg = "Hola "+c.name+", te recordamos tu cuota #"+c.cuota+" por "+money(c.amount)+" con vencimiento "+longDate(c.dueDate)+".";
+    window.open("https://wa.me/"+phone+"?text="+encodeURIComponent(msg), "_blank");
+  });
+
+  document.getElementById('detEditar').addEventListener('click', function(){
+    var id = state.activeId;
+    closeDetail();
+    openForm(id);
+  });
+  document.getElementById('detEliminar').addEventListener('click', function(){
+    var c = findCobro(state.activeId);
+    if(!c) return;
+    if(confirm('¿Eliminar el cobro de '+c.name+'?')){
+      cobros = cobros.filter(function(x){ return x.id!==c.id; });
+      save(cobros);
+      closeDetail();
+      renderAll();
+      showToast("Cobro eliminado");
+    }
+  });
+
+  /* ---------- Formulario agregar/editar ---------- */
+  var formOverlay = document.getElementById('formOverlay');
+  var formTitle = document.getElementById('formTitle');
+  var fName = document.getElementById('fName');
+  var fPhone = document.getElementById('fPhone');
+  var fCuota = document.getElementById('fCuota');
+  var fValor = document.getElementById('fValor');
+  var fFecha = document.getElementById('fFecha');
+
+  function openForm(editId){
+    state.editingId = editId || null;
+    if(editId){
+      var c = findCobro(editId);
+      formTitle.textContent = "Editar cobro";
+      fName.value = c.name;
+      fPhone.value = c.phone || "";
+      fCuota.value = c.cuota;
+      fValor.value = c.amount;
+      fFecha.value = c.dueDate;
+    } else {
+      formTitle.textContent = "Nuevo cobro";
+      fName.value = "";
+      fPhone.value = "";
+      fCuota.value = "";
+      fValor.value = "";
+      fFecha.value = state.selectedDate;
+    }
+    formOverlay.classList.add('open');
+    setTimeout(function(){ fName.focus(); }, 250);
+  }
+  function closeForm(){ formOverlay.classList.remove('open'); }
+  formOverlay.addEventListener('click', function(e){ if(e.target===formOverlay) closeForm(); });
+  document.getElementById('fCancel').addEventListener('click', closeForm);
+
+  document.getElementById('fSave').addEventListener('click', function(){
+    var name = fName.value.trim();
+    var cuota = parseInt(fCuota.value,10);
+    var amount = parseFloat(fValor.value);
+    var dueDate = fFecha.value;
+    if(!name){ showToast("Ingresa el nombre del cliente"); fName.focus(); return; }
+    if(!cuota || cuota<1){ showToast("Ingresa el número de cuota"); fCuota.focus(); return; }
+    if(isNaN(amount) || amount<=0){ showToast("Ingresa un valor válido"); fValor.focus(); return; }
+    if(!dueDate){ showToast("Selecciona la fecha de vencimiento"); fFecha.focus(); return; }
+
+    if(state.editingId){
+      var c = findCobro(state.editingId);
+      c.name = name; c.phone = fPhone.value.trim(); c.cuota = cuota; c.amount = amount; c.dueDate = dueDate;
+    } else {
+      cobros.push({id:cid(), name:name, phone:fPhone.value.trim(), cuota:cuota, amount:amount, dueDate:dueDate, status:"pendiente", reminded:true});
+    }
+    save(cobros);
+    state.selectedDate = dueDate;
+    closeForm();
+    renderAll();
+    showToast("Cobro guardado");
+  });
+
+  document.getElementById('fabAdd').addEventListener('click', function(){ openForm(null); });
+
+  /* ---------- Toast ---------- */
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2200);
+  }
+
+  /* ---------- Estado de conexión (informativo: la app funciona 100% sin conexión) ---------- */
+  var connDot = document.getElementById('connDot');
+  var connLabel = document.getElementById('connLabel');
+  function updateConn(){
+    var online = navigator.onLine;
+    connDot.classList.toggle('on', online);
+    connLabel.textContent = online ? "En línea" : "Sin conexión";
+  }
+  window.addEventListener('online', function(){ updateConn(); showToast("Conexión recuperada — tus datos están seguros"); });
+  window.addEventListener('offline', function(){ updateConn(); showToast("Sin conexión — la app sigue funcionando normalmente"); });
+  updateConn();
+
+  /* ---------- Service worker ---------- */
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('./sw.js').catch(function(){});
+    });
+  }
+
+  /* ---------- Init ---------- */
+  renderAll();
+})();
+</script>
+</body>
+</html>
