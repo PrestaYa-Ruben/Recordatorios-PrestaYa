@@ -140,6 +140,9 @@
     scroll-snap-type:x proximity;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:none;
+    touch-action:pan-x;
+    will-change:scroll-position;
+    overscroll-behavior-x:contain;
   }
   .date-strip-wrap::-webkit-scrollbar{display:none;}
   .date-strip{
@@ -629,7 +632,7 @@
      se va extendiendo hacia atrás/adelante a medida que el usuario se
      acerca a los bordes, para poder llegar a cualquier fecha. */
   var stripState = { startISO: null, endISO: null };
-  var STRIP_CHUNK = 30;      // días que se agregan cada vez que se acerca a un borde
+  var STRIP_CHUNK = 14;      // días que se agregan cada vez que se acerca a un borde (bloques chicos = carga más liviana y fluida)
   var STRIP_MAX_SPAN = 400;  // tope de días mantenidos en pantalla (ventana deslizante)
   var isAdjustingScroll = false;
   var stripScrollScheduled = false;
@@ -725,7 +728,7 @@
 
   function handleStripScroll(){
     if(isAdjustingScroll) return;
-    var threshold = 260;
+    var threshold = 340;
     if(stripWrap.scrollLeft < threshold){
       prependChunk();
     } else if((stripWrap.scrollWidth - stripWrap.scrollLeft - stripWrap.clientWidth) < threshold){
