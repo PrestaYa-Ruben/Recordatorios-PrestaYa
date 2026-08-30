@@ -161,6 +161,7 @@
     justify-content:center;
     gap:2px;
     color:var(--text-primary);
+    position:relative;
   }
   .date-card .mon{font-size:12px;color:var(--text-secondary);font-weight:400;text-transform:lowercase;}
   .date-card .day{font-size:26px;font-weight:600;line-height:1.1;}
@@ -171,15 +172,24 @@
   }
   .date-card.selected .mon,.date-card.selected .wk{color:rgba(255,255,255,0.85);}
   .date-card.selected .day{color:#fff;}
-  .date-card.has-dot{position:relative;}
-  .date-card .dot{
+  .date-card .badge{
     position:absolute;
-    bottom:8px;
-    width:5px;height:5px;
-    border-radius:50%;
-    background:var(--accent-blue);
+    top:-7px;
+    right:-7px;
+    min-width:20px;
+    height:20px;
+    padding:0 5px;
+    border-radius:999px;
+    background:var(--danger);
+    color:#fff;
+    font-size:11px;
+    font-weight:600;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 1px 3px rgba(0,0,0,0.2);
   }
-  .date-card.selected .dot{background:#fff;}
 
   /* Search */
   .search-bar{
@@ -598,8 +608,12 @@
   var stripWrap = document.getElementById('stripWrap');
   var hoyBtn = document.getElementById('hoyBtn');
 
-  function hasPendientes(iso){
-    return cobros.some(function(c){ return c.dueDate===iso && c.status==="pendiente"; });
+  function countPendientes(iso){
+    var n = 0;
+    for(var i=0;i<cobros.length;i++){
+      if(cobros[i].dueDate===iso && cobros[i].status==="pendiente") n++;
+    }
+    return n;
   }
 
   function renderTitle(){
@@ -626,14 +640,14 @@
 
   function createDateCard(iso){
     var d = fromISO(iso);
-    var dot = hasPendientes(iso);
+    var count = countPendientes(iso);
     var card = document.createElement('button');
-    card.className = 'date-card' + (iso===state.selectedDate ? ' selected' : '') + (dot ? ' has-dot' : '');
+    card.className = 'date-card' + (iso===state.selectedDate ? ' selected' : '');
     card.dataset.iso = iso;
     card.innerHTML = '<span class="mon">'+MESES[d.getMonth()].substring(0,3)+'</span>' +
                       '<span class="day">'+d.getDate()+'</span>' +
                       '<span class="wk">'+DIAS[d.getDay()]+'</span>' +
-                      (dot ? '<span class="dot"></span>' : '');
+                      (count>0 ? '<span class="badge">'+(count>99?'99+':count)+'</span>' : '');
     card.addEventListener('click', function(){ goToDate(iso); });
     return card;
   }
@@ -737,15 +751,18 @@
       var card = cards[i];
       var iso = card.dataset.iso;
       card.classList.toggle('selected', iso===state.selectedDate);
-      var dot = hasPendientes(iso);
-      card.classList.toggle('has-dot', dot);
-      var existingDot = card.querySelector('.dot');
-      if(dot && !existingDot){
-        var span = document.createElement('span');
-        span.className = 'dot';
-        card.appendChild(span);
-      } else if(!dot && existingDot){
-        existingDot.remove();
+      var count = countPendientes(iso);
+      var existingBadge = card.querySelector('.badge');
+      if(count>0){
+        var label = count>99 ? '99+' : String(count);
+        if(!existingBadge){
+          existingBadge = document.createElement('span');
+          existingBadge.className = 'badge';
+          card.appendChild(existingBadge);
+        }
+        existingBadge.textContent = label;
+      } else if(existingBadge){
+        existingBadge.remove();
       }
     }
   }
