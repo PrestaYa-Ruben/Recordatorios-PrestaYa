@@ -86,7 +86,7 @@
     flex:1;
     text-align:center;
     font-size:26px;
-    font-weight:800;
+    font-weight:600;
     letter-spacing:-0.3px;
     margin:0;
   }
@@ -113,7 +113,7 @@
     border:none;
     padding:0;
     font-size:23px;
-    font-weight:800;
+    font-weight:600;
     color:var(--text-primary);
     letter-spacing:-0.3px;
     text-align:left;
@@ -124,7 +124,7 @@
     background:var(--card-bg);
     border:1.5px solid var(--accent-blue);
     color:var(--accent-blue);
-    font-weight:700;
+    font-weight:500;
     font-size:15px;
     padding:9px 20px;
     border-radius:var(--radius-full);
@@ -162,9 +162,9 @@
     gap:2px;
     color:var(--text-primary);
   }
-  .date-card .mon{font-size:12px;color:var(--text-secondary);font-weight:600;text-transform:lowercase;}
-  .date-card .day{font-size:26px;font-weight:800;line-height:1.1;}
-  .date-card .wk{font-size:12px;color:var(--text-secondary);font-weight:600;text-transform:lowercase;}
+  .date-card .mon{font-size:12px;color:var(--text-secondary);font-weight:400;text-transform:lowercase;}
+  .date-card .day{font-size:26px;font-weight:600;line-height:1.1;}
+  .date-card .wk{font-size:12px;color:var(--text-secondary);font-weight:400;text-transform:lowercase;}
   .date-card.selected{
     background:var(--accent-green);
     border-color:var(--accent-green);
@@ -222,15 +222,15 @@
   .bell-btn.done{color:var(--text-muted);}
   .cobro-main{flex:1;min-width:0;cursor:pointer;}
   .cobro-name{
-    font-size:19px;font-weight:800;color:var(--text-primary);
+    font-size:19px;font-weight:600;color:var(--text-primary);
     margin:0 0 6px;letter-spacing:-0.2px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .cobro-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-  .cobro-cuota{font-size:16px;color:var(--text-secondary);font-weight:500;white-space:nowrap;}
+  .cobro-cuota{font-size:16px;color:var(--text-secondary);font-weight:400;white-space:nowrap;}
   .cobro-chip{
     background:var(--chip-bg);color:var(--chip-text);
-    font-size:13px;font-weight:700;
+    font-size:13px;font-weight:500;
     padding:5px 12px;border-radius:var(--radius-full);
     white-space:nowrap;
   }
@@ -250,7 +250,7 @@
     color:var(--text-secondary);
   }
   .empty-state svg{margin-bottom:14px;color:var(--text-muted);}
-  .empty-state p{margin:0;font-size:15px;font-weight:600;}
+  .empty-state p{margin:0;font-size:15px;font-weight:500;}
   .empty-state span{font-size:13px;color:var(--text-muted);}
 
   /* FAB */
@@ -297,27 +297,33 @@
     width:40px;height:5px;background:var(--border-light);
     border-radius:var(--radius-full);margin:6px auto 16px;
   }
-  .sheet h2{font-size:21px;font-weight:800;margin:0 0 4px;letter-spacing:-0.3px;}
+  .sheet h2{font-size:21px;font-weight:600;margin:0 0 4px;letter-spacing:-0.3px;}
   .sheet .sub{color:var(--text-secondary);font-size:14px;margin:0 0 20px;}
   .field{margin-bottom:14px;}
-  .field label{display:block;font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:6px;}
-  .field input,.field select{
+  .field label{display:block;font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;}
+  .field input,.field select,.field textarea{
     width:100%;padding:13px 14px;border-radius:14px;
     border:1.5px solid var(--border-light);font-size:16px;
     background:#FAFAFC;color:var(--text-primary);outline:none;
   }
-  .field input:focus,.field select:focus{border-color:var(--accent-blue);}
+  .field textarea{
+    font-family:inherit;resize:vertical;min-height:76px;line-height:1.4;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent-blue);}
   .detail-row{
     display:flex;justify-content:space-between;align-items:center;
     padding:12px 0;border-bottom:1px solid var(--border-light);
   }
   .detail-row:last-of-type{border-bottom:none;}
-  .detail-row .k{color:var(--text-secondary);font-size:14px;font-weight:600;}
-  .detail-row .v{font-weight:800;font-size:16px;text-align:right;}
+  .detail-row .k{color:var(--text-secondary);font-size:14px;font-weight:400;}
+  .detail-row .v{font-weight:600;font-size:16px;text-align:right;}
+  .detail-notes{margin-top:6px;padding-top:14px;border-top:1px solid var(--border-light);}
+  .detail-notes-label{margin:0 0 6px;font-size:13px;font-weight:500;color:var(--text-secondary);}
+  .detail-notes-text{margin:0;font-size:15px;font-weight:400;color:var(--text-primary);white-space:pre-wrap;line-height:1.45;}
   .sheet-actions{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
   .btn{
     width:100%;padding:15px;border-radius:16px;border:none;
-    font-size:16px;font-weight:700;display:flex;align-items:center;
+    font-size:16px;font-weight:500;display:flex;align-items:center;
     justify-content:center;gap:8px;
   }
   .btn-primary{background:var(--accent-green);color:#fff;}
@@ -335,7 +341,7 @@
     transform:translateX(-50%) translateY(20px);
     background:#22232B;color:#fff;
     padding:12px 20px;border-radius:var(--radius-full);
-    font-size:14px;font-weight:600;
+    font-size:14px;font-weight:500;
     box-shadow:var(--shadow-pop);
     opacity:0;transition:all 0.25s ease;
     pointer-events:none;z-index:200;
@@ -354,7 +360,7 @@
     display:flex;align-items:center;gap:12px;margin-bottom:14px;
   }
   .settings-card-head svg{flex-shrink:0;color:var(--accent-blue);}
-  .settings-card-title{margin:0;font-size:16px;font-weight:800;color:var(--text-primary);}
+  .settings-card-title{margin:0;font-size:16px;font-weight:600;color:var(--text-primary);}
   .settings-card-desc{margin:2px 0 0;font-size:13px;color:var(--text-secondary);}
   .settings-card .btn{margin-top:0;}
   .settings-card .btn + .btn{margin-top:10px;}
@@ -364,8 +370,8 @@
     font-size:14px;
   }
   .settings-row:last-of-type{border-bottom:none;}
-  .settings-row .k{color:var(--text-secondary);font-weight:600;}
-  .settings-row .v{font-weight:800;color:var(--text-primary);}
+  .settings-row .k{color:var(--text-secondary);font-weight:400;}
+  .settings-row .v{font-weight:600;color:var(--text-primary);}
 
   ::selection{background:var(--chip-bg);}
 </style>
@@ -422,6 +428,10 @@
         <div class="detail-row"><span class="k">Vence</span><span class="v" id="detFecha">-</span></div>
         <div class="detail-row"><span class="k">Estado</span><span class="v" id="detEstado">Pendiente</span></div>
       </div>
+      <div class="detail-notes" id="detNotasWrap" style="display:none;">
+        <p class="detail-notes-label">Notas</p>
+        <p class="detail-notes-text" id="detNotasText"></p>
+      </div>
       <div class="sheet-actions">
         <button class="btn btn-whatsapp" id="detWhatsapp">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.44 1.32 4.94L2 22l5.29-1.39a9.9 9.9 0 004.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C22 6.45 17.5 2 12.04 2zm0 18.14c-1.5 0-2.97-.4-4.25-1.16l-.3-.18-3.14.82.84-3.06-.2-.32a8.2 8.2 0 01-1.26-4.33c0-4.53 3.69-8.22 8.23-8.22 2.2 0 4.26.86 5.82 2.41a8.15 8.15 0 012.41 5.81c0 4.53-3.69 8.23-8.15 8.23z"/></svg>
@@ -463,6 +473,10 @@
       <div class="field">
         <label>Fecha de vencimiento</label>
         <input type="date" id="fFecha">
+      </div>
+      <div class="field">
+        <label>Notas (opcional)</label>
+        <textarea id="fNotas" rows="3" placeholder="Ej: Paga los viernes, prefiere Nequi..."></textarea>
       </div>
       <div class="sheet-actions">
         <button class="btn btn-primary" id="fSave">Guardar</button>
@@ -987,6 +1001,8 @@
   var detEstado = document.getElementById('detEstado');
   var detMarcarPagado = document.getElementById('detMarcarPagado');
   var detWhatsapp = document.getElementById('detWhatsapp');
+  var detNotasWrap = document.getElementById('detNotasWrap');
+  var detNotasText = document.getElementById('detNotasText');
 
   function findCobro(id){
     for(var i=0;i<cobros.length;i++){ if(cobros[i].id===id) return cobros[i]; }
@@ -1009,6 +1025,13 @@
     detFecha.textContent = longDate(c.dueDate);
     detEstado.textContent = c.status==="cobrado" ? "Cobrado" : "Pendiente";
     detMarcarPagado.textContent = c.status==="cobrado" ? "Marcar como pendiente" : "Marcar como cobrado";
+    if(c.notes && c.notes.trim()){
+      detNotasText.textContent = c.notes;
+      detNotasWrap.style.display = "";
+    } else {
+      detNotasText.textContent = "";
+      detNotasWrap.style.display = "none";
+    }
     detailOverlay.classList.add('open');
   }
   function closeDetail(){ detailOverlay.classList.remove('open'); state.activeId=null; }
@@ -1064,6 +1087,7 @@
   var fCuota = document.getElementById('fCuota');
   var fValor = document.getElementById('fValor');
   var fFecha = document.getElementById('fFecha');
+  var fNotas = document.getElementById('fNotas');
 
   fValor.addEventListener('input', function(){
     var raw = fValor.value.replace(/\D/g,'');
@@ -1082,6 +1106,7 @@
       fCuota.value = c.cuota != null ? c.cuota : "";
       fValor.value = c.amount != null ? Number(c.amount).toLocaleString('es-CO') : "";
       fFecha.value = c.dueDate;
+      fNotas.value = c.notes || "";
     } else {
       formTitle.textContent = "Nuevo cobro";
       fName.value = "";
@@ -1089,6 +1114,7 @@
       fCuota.value = "";
       fValor.value = "";
       fFecha.value = state.selectedDate;
+      fNotas.value = "";
     }
     formOverlay.classList.add('open');
     setTimeout(function(){ fName.focus(); }, 250);
@@ -1107,12 +1133,13 @@
     var cuota = rawCuota ? parseInt(rawCuota,10) : null;
     var rawValor = fValor.value.replace(/\D/g,'');
     var amount = rawValor ? parseInt(rawValor,10) : null;
+    var notes = fNotas.value.trim();
 
     if(state.editingId){
       var c = findCobro(state.editingId);
-      c.name = name; c.phone = fPhone.value.trim(); c.cuota = cuota; c.amount = amount; c.dueDate = dueDate;
+      c.name = name; c.phone = fPhone.value.trim(); c.cuota = cuota; c.amount = amount; c.dueDate = dueDate; c.notes = notes;
     } else {
-      cobros.push({id:cid(), name:name, phone:fPhone.value.trim(), cuota:cuota, amount:amount, dueDate:dueDate, status:"pendiente", reminded:true});
+      cobros.push({id:cid(), name:name, phone:fPhone.value.trim(), cuota:cuota, amount:amount, dueDate:dueDate, notes:notes, status:"pendiente", reminded:true});
     }
     save(cobros);
     closeForm();
