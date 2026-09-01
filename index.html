@@ -44,6 +44,10 @@
     overscroll-behavior-y:none;
     -webkit-font-smoothing:antialiased;
   }
+  body.modal-open{
+    overflow:hidden;
+    touch-action:none;
+  }
   button{font-family:inherit;}
   input{font-family:inherit;}
   .app{
@@ -304,6 +308,9 @@
     transition:transform 0.28s cubic-bezier(.2,.8,.2,1);
     max-height:88vh;
     overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    touch-action:pan-y;
   }
   .overlay.open .sheet{transform:translateY(0);}
   .sheet-handle{
@@ -904,6 +911,19 @@
   window.addEventListener('offline', function(){ updateConn(); showToast("Sin conexión — la app sigue funcionando normalmente"); });
   updateConn();
 
+  /* ---------- Bloqueo de scroll de fondo mientras hay una hoja abierta ----------
+     Sin esto, el gesto de deslizar dentro de la hoja a veces "peleaba" con el
+     scroll de la página de atrás y había que intentarlo 2 o 3 veces. */
+  var openSheetsCount = 0;
+  function lockBodyScroll(){
+    openSheetsCount++;
+    document.body.classList.add('modal-open');
+  }
+  function unlockBodyScroll(){
+    openSheetsCount = Math.max(0, openSheetsCount - 1);
+    if(openSheetsCount === 0){ document.body.classList.remove('modal-open'); }
+  }
+
   /* ---------- Ajustes / Copia de seguridad ---------- */
   var settingsOverlay = document.getElementById('settingsOverlay');
   var settingsBtn = document.getElementById('settingsBtn');
@@ -914,8 +934,9 @@
     updateConn();
     settingsCountLabel.textContent = cobros.length;
     settingsOverlay.classList.add('open');
+    lockBodyScroll();
   }
-  function closeSettings(){ settingsOverlay.classList.remove('open'); }
+  function closeSettings(){ settingsOverlay.classList.remove('open'); unlockBodyScroll(); }
   settingsBtn.addEventListener('click', openSettings);
   document.getElementById('settingsClose').addEventListener('click', closeSettings);
   settingsOverlay.addEventListener('click', function(e){ if(e.target===settingsOverlay) closeSettings(); });
@@ -1053,8 +1074,9 @@
       detNotasWrap.style.display = "none";
     }
     detailOverlay.classList.add('open');
+    lockBodyScroll();
   }
-  function closeDetail(){ detailOverlay.classList.remove('open'); state.activeId=null; }
+  function closeDetail(){ detailOverlay.classList.remove('open'); state.activeId=null; unlockBodyScroll(); }
   detailOverlay.addEventListener('click', function(e){ if(e.target===detailOverlay) closeDetail(); });
 
   detMarcarPagado.addEventListener('click', function(){
@@ -1137,9 +1159,10 @@
       fNotas.value = "";
     }
     formOverlay.classList.add('open');
+    lockBodyScroll();
     setTimeout(function(){ fName.focus(); }, 250);
   }
-  function closeForm(){ formOverlay.classList.remove('open'); }
+  function closeForm(){ formOverlay.classList.remove('open'); unlockBodyScroll(); }
   formOverlay.addEventListener('click', function(e){ if(e.target===formOverlay) closeForm(); });
   document.getElementById('fCancel').addEventListener('click', closeForm);
 
